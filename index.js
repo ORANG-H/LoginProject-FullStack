@@ -7,6 +7,8 @@ import bcrypt from "bcrypt";
 import pg from "pg";
 import multer from "multer";
 import 'dotenv/config';
+import { createClient } from "@supabase/supabase-js";
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -20,17 +22,7 @@ app.use(bodyParser.json());
 
 app.use(express.static("public"));
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "public/"); // Save files directly into the 'public' folder
-  },
-  filename: (req, file, cb) => {
-    // Give the file a unique name using the current timestamp + its original name
-    const uniqueSuffix = Date.now() + "-" + file.originalname;
-    cb(null, uniqueSuffix);
-  }
-});
-
+const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 app.use(session({ secret: "secret", 
@@ -72,45 +64,52 @@ app.get("/login", (req, res) => {
 
 
 
-app.post("/register", upload.single("pfp"), (req, res) => {
+app.post("/register", upload.single("pfp"), async (req, res) => {
   const { name, surname, email, password, password_confirm } = req.body;
   
   if (password !== password_confirm) {
     return res.render("register.ejs", { error: "Passwords do not match." });
   }
 
-  bcrypt.hash(password, 10, async (err, hashedPassword) => {
-    if (err) {
-      console.error("Error hashing password:", err);
-      return res.render("register.ejs", { error: "Error processing registration. Try again." });
+  try {
+    const userExists = await db.query("SELECT * FROM registered WHERE email = $1", [email]);
+    if (userExists.rows.length > 0) {
+      return res.render("register.ejs", { error: "User with this email already exists." });
     }
-    
-    try {
-      // 1. Check if user already exists
-      const userExists = await db.query("SELECT * FROM registered WHERE email = $1", [email]);
-      if (userExists.rows.length > 0) {
-        return res.render("register.ejs", { error: "User with this email already exists." });
+
+    let imagePath = null;
+
+    // Upload profile picture to Supabase Storage if uploaded
+    if (req.file) {
+      const uniqueFilename = `${Date.now()}-${req.file.originalname.replace(/\s+/g, "_")}`;
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(uniqueFilename, req.file.buffer, {
+          contentType: req.file.mimetype,
+        });
+
+      if (uploadError) {
+        console.error("Supabase Storage Upload Error:", uploadError);
+      } else {
+        const { data: publicUrlData } = supabase.storage
+          .from("avatars")
+          .getPublicUrl(uniqueFilename);
+        imagePath = publicUrlData.publicUrl;
       }
-
-      // 2. Determine image path if uploaded
-      const imagePath = req.file ? "/" + req.file.filename : null;
-
-      // 3. Insert user into database (declared ONLY ONCE)
-      const result = await db.query(
-        "INSERT INTO registered (name, surname, email, password, profile_pic) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-        [name, surname, email, hashedPassword, imagePath]
-      );
-      
-      console.log("New user saved to database:", result.rows[0]);
-      
-      // 4. Redirect to login
-      res.redirect("/login");
-
-    } catch (dbErr) {
-      console.error("Database error:", dbErr);
-      res.render("register.ejs", { error: "Database error saving user." });
     }
-  });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await db.query(
+      "INSERT INTO registered (name, surname, email, password, profile_pic) VALUES ($1, $2, $3, $4, $5)",
+      [name, surname, email, hashedPassword, imagePath]
+    );
+
+    res.redirect("/login");
+  } catch (err) {
+    console.error("Registration error:", err);
+    res.render("register.ejs", { error: "Error processing registration." });
+  }
 });
 
 
@@ -290,25 +289,39 @@ app.get("/logout", (req, res) => {
 });
 
 
-
 app.post("/profile", upload.single("profilePicture"), async (req, res) => {
   if (!req.session.userId) {
     return res.redirect("/login");
   }
 
   const { name, surname, email } = req.body;
+  let imagePath = req.session.img; // Default to current avatar
 
   try {
-    // Determine the image path (use new file if uploaded, otherwise keep existing session image)
-    const imagePath = req.file ? "/" + req.file.filename : req.session.img;
+    // If a new picture is uploaded, send it to Supabase Storage
+    if (req.file) {
+      const uniqueFilename = `${Date.now()}-${req.file.originalname.replace(/\s+/g, "_")}`;
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(uniqueFilename, req.file.buffer, {
+          contentType: req.file.mimetype,
+        });
 
-    // Update database (Make sure your table has the 'profile_pic' column!)
+      if (uploadError) {
+        console.error("Supabase Storage Upload Error:", uploadError);
+      } else {
+        const { data: publicUrlData } = supabase.storage
+          .from("avatars")
+          .getPublicUrl(uniqueFilename);
+        imagePath = publicUrlData.publicUrl;
+      }
+    }
+
     await db.query(
       "UPDATE registered SET name = $1, surname = $2, email = $3, profile_pic = $4 WHERE id = $5",
       [name, surname, email, imagePath, req.session.userId]
     );
 
-    // Update session data so navbar updates instantly
     req.session.name = name;
     req.session.surname = surname;
     req.session.email = email;
