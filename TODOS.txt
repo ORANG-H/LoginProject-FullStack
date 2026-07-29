@@ -1,0 +1,3 @@
+1- fix the setions 
+2- use AI to translate the advices to arabic , turkish , english , german 
+3- ulet an ai chatbot exist to ask questions (option?)

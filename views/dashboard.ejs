@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" href="/favicon.ico">
+    <title>Dashboard | <%= name %> <%= surname %></title>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans">
+    
+    <!-- Navigation Bar -->
+    <%- include('nav', { name: name, surname: surname, img: img }) %>
+    <!-- Main Content Container -->
+    <main class="container mx-auto px-6 py-10">
+        
+        <h1 class="text-4xl font-extrabold text-gray-950 mb-4">Welcome Back, <%= name %>!</h1>
+        <p class="text-gray-700 mb-8 max-w-xl">You are successfully authenticated. From here, you can manage your account, access exclusive platform features, or review your daily updates.</p>
+
+<!-- Custom Jump Animation Style -->
+<style>
+    @keyframes jumpBounce {
+        0% { transform: translateY(0) scale(1); }
+        40% { transform: translateY(-8px) scale(1.03); }
+        80% { transform: translateY(2px) scale(0.98); }
+        100% { transform: translateY(0) scale(1); }
+    }
+    .animate-jump {
+        animation: jumpBounce 0.4s ease-in-out;
+    }
+</style>
+
+<!-- Advice Grid Container -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+    <% advices.forEach((item, index) => { %>
+        <div 
+            onclick="saveAdviceToDB(this, '<%= item.advice.replace(/'/g, "\\'") %>')" 
+            class="group relative bg-[#121824] border border-sky-500/30 p-6 rounded-xl text-sky-300 font-mono text-sm shadow-[0_4px_20px_rgba(0,0,0,0.5)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_0_25px_rgba(14,165,233,0.3)] hover:border-sky-400 cursor-pointer select-none"
+        >
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-xs text-sky-400/70 font-bold tracking-wider">ADVICE_#<%= index + 1 %></span>
+                
+                <!-- Checkmark Icon -->
+                <div class="check-icon opacity-0 scale-50 transition-all duration-300 w-6 h-6 rounded-full bg-emerald-500 text-black flex items-center justify-center font-bold">
+                    ✓
+                </div>
+            </div>
+
+            <p class="text-slate-100 text-base leading-relaxed"><%= item.advice %></p>
+        </div>
+    <% }) %>
+</div>
+
+<!-- Frontend Script to handle saving and the jump animation -->
+<script>
+    async function saveAdviceToDB(card, adviceText) {
+        // Prevent re-saving if already favorited
+        if (card.classList.contains("favorited")) return;
+
+        // 1. Trigger the aesthetic jump animation
+        card.classList.add("animate-jump");
+        setTimeout(() => {
+            card.classList.remove("animate-jump");
+        }, 400);
+
+        try {
+            // 2. Send request to backend to store in DB
+            const response = await fetch("/save-advice", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ adviceText: adviceText })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // 3. Turn green & show checkmark
+                card.classList.add("favorited");
+                card.classList.remove("bg-[#121824]", "border-sky-500/30", "hover:border-sky-400", "hover:shadow-[0_0_25px_rgba(14,165,233,0.3)]");
+                card.classList.add("bg-emerald-950/40", "border-emerald-500", "shadow-[0_0_25px_rgba(16,185,129,0.3)]");
+                
+                const check = card.querySelector(".check-icon");
+                check.classList.remove("opacity-0", "scale-50");
+                check.classList.add("opacity-100", "scale-100");
+            } else {
+                console.error("Failed to save advice");
+            }
+        } catch (err) {
+            console.error("Error connecting to server:", err);
+        }
+    }
+</script>
+
+
+
+
+
+
+        <!-- Account Controls Section (Restored) -->
+        <div class="bg-light p-8 rounded-2xl shadow-sm border border-gray-100 max-w-md flex flex-col items-center mt-10 w-full mx-auto text-center border-sky-500/20">
+            <h2 class="text-2xl font-bold mb-5 text-gray-950">Quick Actions</h2>
+            
+            <a href="/profile" class="block text-center bg-gray-100 text-gray-900 font-semibold px-6 py-3 rounded-lg hover:bg-gray-200 transition mb-3">
+                Update Profile Details
+            </a>
+            <a href="/refresh-data" class="block text-center bg-gray-100 text-gray-900 font-semibold px-6 py-3 rounded-lg hover:bg-gray-200 transition mb-3">
+                Get New Advices ! 
+            </a>
+            <form action="/logout" method="POST">
+                <button type="submit" class="w-full bg-red-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-red-700 transition">
+                    End Session (Logout)
+                </button>
+            </form>
+        </div>
+
+    </main>
+
+</body>
+</html>

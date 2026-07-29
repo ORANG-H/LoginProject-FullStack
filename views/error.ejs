@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>System Error</title>
+    <style>
+        body {
+            background-color: #050505;
+            background-image: 
+                linear-gradient(rgba(239, 68, 68, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(239, 68, 68, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 font-sans text-slate-300">
+
+    <div class="relative w-full max-w-md bg-[#0a0a0a]/95 backdrop-blur-md border border-red-500/20 p-8 rounded-lg shadow-[0_0_30px_rgba(239,68,68,0.1)] text-center">
+        <!-- Glowing red accent line -->
+        <div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-red-500 to-transparent"></div>
+
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-500/10 text-red-400 mb-4 border border-red-500/20">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        </div>
+
+        <h1 class="text-xl font-bold text-white tracking-widest font-mono mb-2">SYSTEM_EXCEPTION</h1>
+        
+        <!-- This dynamically prints whatever error message you pass from backend -->
+        <p class="text-red-400/80 text-sm font-mono mb-6 bg-red-950/20 border border-red-900/30 p-3 rounded">
+            <%= errorMessage || "An unexpected system fault occurred." %>
+        </p>
+
+        <a href="/login" class="inline-block w-full py-3 px-4 border border-red-500/50 text-sm font-mono font-bold tracking-widest rounded-md text-red-400 bg-red-900/10 hover:bg-red-500 hover:text-black transition-all duration-300">
+            RETURN_TO_LOGIN
+        </a>
+    </div>
+
+</body>
+</html>

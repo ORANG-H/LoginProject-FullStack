@@ -1,0 +1,40 @@
+{
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "nodemon": "^3.1.14",
+    "postcss": "^8.5.23",
+    "tailwindcss": "^4.3.3",
+    "vite": "^5.4.0"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "body-parser": "^2.3.0",
+    "dotenv": "^17.4.2",
+    "ejs": "^6.0.1",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "multer": "^2.2.0",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "pg": "^8.22.0"
+  },
+  "name": "login-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "allowScripts": {
+    "body-parser@2.3.0": true,
+    "ejs@6.0.1": true,
+    "express@5.2.1": true,
+    "express-session@1.19.0": true,
+    "passport@0.7.0": true,
+    "passport-local@1.0.0": true
+  }
+}

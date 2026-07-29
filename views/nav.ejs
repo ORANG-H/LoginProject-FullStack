@@ -1,0 +1,59 @@
+    <nav class="bg-gray-900 text-white px-6 py-4 shadow-md position-fixed top-0 left-0 right-0 z-50">
+        <!-- Using justify-between pushes the links to the left and profile to the right -->
+        <ul class="flex items-center justify-between w-full">
+            
+            <!-- Left Side: Navigation Links -->
+            <div class="flex items-center space-x-6">
+                <li>
+                    <a href="/" class="hover:bg-gray-700 px-4 py-2 rounded transition font-medium">Login Page</a>
+                </li>
+                <li>
+                    <a href="/dashboard" class="bg-gray-700 text-white hover:bg-gray-600 px-4 py-2 rounded transition font-medium">Dashboard</a>
+                </li>
+                <li>
+                    <a href="/about" class="hover:bg-gray-700 px-4 py-2 rounded transition font-medium">About</a>
+                </li>
+
+                
+            </div>
+
+            <!-- Right Side: Date & User Profile Section -->
+            <div class="flex items-center space-x-6">
+                
+                <!-- Fixed Date Layout -->
+             
+
+                <!-- Stylized User Text -->
+                <li class="px-3 py-1.5 rounded bg-gray-800 text-gray-200 text-xs font-mono tracking-wide">
+                    <span class="text-gray-400">Logged in:</span> 
+                    <strong><%= name %> <%= surname %></strong>
+                </li>
+
+                <!-- Add this inside your nav.ejs links section -->
+<a href="/saved-advices" class="flex items-center space-x-2 text-sky-400 hover:text-white transition-colors">
+    <svg fill="#0ea5e9" class="w-5 h-5" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6.97,30.75H25.03c.41,0,.75-.34,.75-.75V3.89c0-.41-.34-.75-.75-.75h-2.56v-1.14c0-.41-.34-.75-.75-.75s-.75,.34-.75,.75v1.14h-4.22v-1.14c0-.41-.34-.75-.75-.75s-.75,.34-.75,.75v1.14h-4.22v-1.14c0-.41-.34-.75-.75-.75s-.75,.34-.75,.75v1.14h-2.56c-.41,0-.75,.34-.75,.75V30c0,.41,.34,.75,.75,.75Zm.75-26.11h1.81v1.14c0,.41,.34,.75,.75,.75s.75-.34,.75-.75v-1.14h4.22v1.14c0,.41,.34,.75,.75,.75s-.75-.34,.75-.75v-1.14h4.22v1.14c0,.41,.34,.75,.75,.75s-.75-.34,.75-.75v-1.14h1.81V29.25H7.72V4.64Z"></path>
+        <path d="M16.86,9.66h-6.57c-.41,0-.75,.34-.75,.75s.34,.75,.75,.75h6.57c.41,0,.75-.34,.75-.75s-.34-.75-.75-.75Z"></path>
+        <path d="M16.86,16.19h-6.57c-.41,0-.75,.34-.75,.75s.34,.75,.75,.75h6.57c.41,0,.75-.34,.75-.75s-.34-.75-.75-.75Z"></path>
+        <path d="M16.86,22.73h-6.57c-.41,0-.75,.34-.75,.75s.34,.75,.75,.75h6.57c.41,0,.75-.34,.75-.75s-.34-.75-.75-.75Z"></path>
+    </svg>
+    <span class="font-mono text-xs tracking-wider">FAVES</span>
+</a>
+
+                <!-- Profile Image -->
+                <li>
+                    <% if (locals.img) { %>
+                    <a href="/profile" class="block transition-transform hover:scale-110" title="View Profile">
+                        <img src="<%= img %>" alt="Profile" 
+                             class="w-10 h-10 rounded-full border-2 border-gray-600 object-cover shadow-inner">
+                    </a>
+                    <% } else { %>
+                    <a href="/profile" class="block transition-transform hover:scale-110 flex items-center justify-center w-10 h-10 rounded-full bg-gray-700 text-sm font-bold border-2 border-gray-600 text-gray-300" title="View Profile">
+                        <%= name.charAt(0).toUpperCase() %><%= surname.charAt(0).toUpperCase() %>
+                    </a>
+                    <% } %>
+                </li>
+            </div>
+
+        </ul>
+    </nav>
